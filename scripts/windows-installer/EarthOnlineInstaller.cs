@@ -1,0 +1,100 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace EarthOnlineInstaller
+{
+    internal static class Program
+    {
+        private const string AppName = "地球online成就殿堂";
+        private const string PayloadResourceSuffix = "payload.zip";
+
+        [STAThread]
+        private static void Main()
+        {
+            Application.EnableVisualStyles();
+
+            try
+            {
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                string installRoot = Path.Combine(localAppData, "Programs", "EarthOnlineAchievementPalace");
+                string dataRoot = Path.Combine(localAppData, "EarthOnlineAchievementPalace");
+                string archiveRoot = Path.Combine(dataRoot, "achievement-archive");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(installRoot));
+                Directory.CreateDirectory(dataRoot);
+                Directory.CreateDirectory(archiveRoot);
+
+                if (Directory.Exists(installRoot))
+                {
+                    Directory.Delete(installRoot, true);
+                }
+                Directory.CreateDirectory(installRoot);
+
+                string tempZip = Path.Combine(Path.GetTempPath(), "EarthOnlineAchievementPalace-payload.zip");
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                string resourceName = assembly
+                    .GetManifestResourceNames()
+                    .FirstOrDefault(name => name.EndsWith(PayloadResourceSuffix, StringComparison.OrdinalIgnoreCase));
+
+                using (Stream input = resourceName == null ? null : assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (input == null) throw new InvalidOperationException("Missing embedded payload.");
+                    using (FileStream output = File.Create(tempZip))
+                    {
+                        input.CopyTo(output);
+                    }
+                }
+
+                ZipFile.ExtractToDirectory(tempZip, installRoot);
+                File.Delete(tempZip);
+
+                string launcher = Path.Combine(installRoot, "launch-earth-online-achievement-palace.ps1");
+                string icon = Path.Combine(installRoot, "build", "app-icon.ico");
+
+                string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                CreateShortcut(Path.Combine(desktop, AppName + ".lnk"), launcher, installRoot, icon);
+
+                string startMenu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), AppName);
+                Directory.CreateDirectory(startMenu);
+                CreateShortcut(Path.Combine(startMenu, AppName + ".lnk"), launcher, installRoot, icon);
+
+                MessageBox.Show(
+                    "安装完成。桌面已创建快捷方式。\n\n成就档案会保存在：\n" + archiveRoot,
+                    AppName,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "安装失败：\n" + ex.Message,
+                    AppName,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                Environment.ExitCode = 1;
+            }
+        }
+
+        private static void CreateShortcut(string shortcutPath, string launcher, string workingDirectory, string iconPath)
+        {
+            Type shellType = Type.GetTypeFromProgID("WScript.Shell");
+            dynamic shell = Activator.CreateInstance(shellType);
+            dynamic shortcut = shell.CreateShortcut(shortcutPath);
+            shortcut.TargetPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0", "powershell.exe");
+            shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"" + launcher + "\"";
+            shortcut.WorkingDirectory = workingDirectory;
+            shortcut.IconLocation = iconPath;
+            shortcut.Description = AppName;
+            shortcut.Save();
+
+            Marshal.FinalReleaseComObject(shortcut);
+            Marshal.FinalReleaseComObject(shell);
+        }
+    }
+}

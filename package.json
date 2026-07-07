@@ -1,0 +1,14 @@
+{
+  "name": "earth-online-achievement-palace",
+  "version": "0.2.0",
+  "private": true,
+  "description": "A local-first black-gold achievement palace for Earth Online life records.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-csharp-installer.ps1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
