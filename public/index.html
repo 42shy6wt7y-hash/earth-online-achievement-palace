@@ -14,6 +14,7 @@
           <h1>地球online成就殿堂</h1>
         </div>
         <div class="top-actions" id="normalActions">
+          <button class="action-button ghost letter-trigger" id="openLetterButton" type="button">信</button>
           <button class="action-button ghost" id="openArchiveButton" type="button">档案库</button>
           <button class="action-button" id="createButton" type="button">创建</button>
           <button class="action-button danger" id="deleteModeButton" type="button">删除</button>
@@ -96,6 +97,25 @@
       </section>
     </div>
 
+
+    <div class="letter-layer hidden" id="letterLayer" aria-hidden="true">
+      <section class="letter-card" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+        <p class="section-label">PLAYER MESSAGE</p>
+        <h2 id="letterTitle">给玩家的一封信</h2>
+        <div class="letter-body">
+          <p>玩家你好：</p>
+          <p>欢迎来到地球online成就殿堂。</p>
+          <p>这里没有标准答案，也没有必须完成的路线。你可以添加任何成就，也可以删除任何成就；你可以把一次微不足道的瞬间郑重收藏，也可以把别人眼中闪闪发光的大事轻轻放下。</p>
+          <p>因为你的人生不需要由系统判定，也不需要被某张榜单解释。你不是因为完成了什么才变得有意义，你的意义就在你本身。</p>
+          <p>那些相遇、选择、失败、重来，那些深夜里只有你知道的坚持，那些看似荒唐却真实发生过的片刻，都可以成为这场游戏的注脚。成就不是用来证明你配得上人生，而是用来提醒你：你确实来过，确实玩过，确实以自己的方式走到了这里。</p>
+          <p>所以，请随意编辑你的档案。把你认可的事写下来，把你想纪念的瞬间留下来。这不是世界给你的评分表，而是你写给自己的存档记录。</p>
+          <p>愿你在漫长而随机的地球服务器里，保留一点自由，一点幽默，一点不服输的心。祝你游戏人生，也祝你认真地成为自己。</p>
+        </div>
+        <div class="letter-actions">
+          <button class="action-button" id="closeLetterButton" type="button">收起</button>
+        </div>
+      </section>
+    </div>
     <div class="confirm-layer hidden" id="confirmLayer" aria-hidden="true">
       <section class="confirm-card" role="dialog" aria-modal="true">
         <h2 id="confirmTitle">确认</h2>

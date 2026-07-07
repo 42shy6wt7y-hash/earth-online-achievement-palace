@@ -22,6 +22,9 @@ const el = {
   cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
   confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
   openArchiveButton: document.querySelector("#openArchiveButton"),
+  openLetterButton: document.querySelector("#openLetterButton"),
+  letterLayer: document.querySelector("#letterLayer"),
+  closeLetterButton: document.querySelector("#closeLetterButton"),
   modalLayer: document.querySelector("#modalLayer"),
   detailCard: document.querySelector(".detail-card"),
   closeDetailButton: document.querySelector("#closeDetailButton"),
@@ -498,6 +501,16 @@ function showConfirm({ title, message, actions }) {
 function hideConfirm() {
   el.confirmLayer.classList.add("hidden");
   el.confirmLayer.setAttribute("aria-hidden", "true");
+
+function openLetter() {
+  el.letterLayer.classList.remove("hidden");
+  el.letterLayer.setAttribute("aria-hidden", "false");
+}
+
+function closeLetter() {
+  el.letterLayer.classList.add("hidden");
+  el.letterLayer.setAttribute("aria-hidden", "true");
+}
 }
 
 async function openArchiveFolder() {
@@ -512,6 +525,8 @@ async function openArchiveFolder() {
       actions: [{ label: "知道了", action: hideConfirm }]
     });
   } catch (error) {
+el.openLetterButton.addEventListener("click", openLetter);
+el.closeLetterButton.addEventListener("click", closeLetter);
     showConfirm({
       title: "本地档案库",
       message: "档案保存在当前项目的 achievement-archive 文件夹中。创建、修改、删除都会留下事件文件，图片也会复制进去。",
@@ -564,6 +579,11 @@ el.achievedAtInput.addEventListener("input", () => {
 });
 
 window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !el.letterLayer.classList.contains("hidden")) {
+    closeLetter();
+    return;
+  }
+
   if (event.key === "Escape" && !el.modalLayer.classList.contains("hidden")) {
     closeDetail();
   }
