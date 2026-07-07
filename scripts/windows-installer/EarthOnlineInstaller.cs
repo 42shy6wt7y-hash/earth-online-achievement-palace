@@ -31,9 +31,11 @@ namespace EarthOnlineInstaller
                 Directory.CreateDirectory(dataRoot);
                 Directory.CreateDirectory(archiveRoot);
 
+                StopRunningAppNode(installRoot);
+
                 if (Directory.Exists(installRoot))
                 {
-                    Directory.Delete(installRoot, true);
+                    DeleteDirectoryWithRetry(installRoot);
                 }
                 Directory.CreateDirectory(installRoot);
 
@@ -82,6 +84,53 @@ namespace EarthOnlineInstaller
                     MessageBoxIcon.Error);
                 Environment.ExitCode = 1;
             }
+        }
+
+        private static void StopRunningAppNode(string installRoot)
+        {
+            string runtimeNode = Path.Combine(installRoot, "runtime", "node.exe");
+            foreach (Process process in Process.GetProcessesByName("node"))
+            {
+                try
+                {
+                    string processPath = process.MainModule.FileName;
+                    if (!string.Equals(processPath, runtimeNode, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    process.Kill();
+                    process.WaitForExit(5000);
+                }
+                catch
+                {
+                    // Ignore processes we cannot inspect; only the Palace runtime node is a valid target.
+                }
+                finally
+                {
+                    process.Dispose();
+                }
+            }
+        }
+
+        private static void DeleteDirectoryWithRetry(string directory)
+        {
+            Exception lastError = null;
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    Directory.Delete(directory, true);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                    System.Threading.Thread.Sleep(300);
+                }
+            }
+
+            throw lastError;
         }
 
         private static void WriteHiddenLauncher(string hiddenLauncher, string launcher)
