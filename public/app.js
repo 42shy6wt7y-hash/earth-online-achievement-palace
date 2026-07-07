@@ -501,6 +501,7 @@ function showConfirm({ title, message, actions }) {
 function hideConfirm() {
   el.confirmLayer.classList.add("hidden");
   el.confirmLayer.setAttribute("aria-hidden", "true");
+}
 
 function openLetter() {
   el.letterLayer.classList.remove("hidden");
@@ -510,7 +511,6 @@ function openLetter() {
 function closeLetter() {
   el.letterLayer.classList.add("hidden");
   el.letterLayer.setAttribute("aria-hidden", "true");
-}
 }
 
 async function openArchiveFolder() {
@@ -525,8 +525,6 @@ async function openArchiveFolder() {
       actions: [{ label: "知道了", action: hideConfirm }]
     });
   } catch (error) {
-el.openLetterButton.addEventListener("click", openLetter);
-el.closeLetterButton.addEventListener("click", closeLetter);
     showConfirm({
       title: "本地档案库",
       message: "档案保存在当前项目的 achievement-archive 文件夹中。创建、修改、删除都会留下事件文件，图片也会复制进去。",
@@ -540,6 +538,8 @@ el.deleteModeButton.addEventListener("click", enterDeleteMode);
 el.cancelDeleteButton.addEventListener("click", exitDeleteMode);
 el.confirmDeleteButton.addEventListener("click", confirmDeleteSelected);
 el.openArchiveButton.addEventListener("click", openArchiveFolder);
+el.openLetterButton.addEventListener("click", openLetter);
+el.closeLetterButton.addEventListener("click", closeLetter);
 el.closeDetailButton.addEventListener("click", closeDetail);
 el.editButton.addEventListener("click", startEdit);
 el.deleteCurrentButton.addEventListener("click", deleteCurrentAchievement);

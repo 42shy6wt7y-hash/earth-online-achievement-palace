@@ -624,6 +624,7 @@ h1 {
 .detail-footer {
   justify-content: flex-end;
   padding-top: 16px;
+}
 
 .letter-layer {
   position: fixed;
@@ -678,7 +679,6 @@ h1 {
   display: flex;
   justify-content: flex-end;
   margin-top: 22px;
-}
 }
 
 .detail-footer #deleteCurrentButton {
