@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace EarthOnlineInstaller
@@ -55,14 +56,16 @@ namespace EarthOnlineInstaller
                 File.Delete(tempZip);
 
                 string launcher = Path.Combine(installRoot, "launch-earth-online-achievement-palace.ps1");
+                string hiddenLauncher = Path.Combine(installRoot, "launch-earth-online-achievement-palace.vbs");
                 string icon = Path.Combine(installRoot, "build", "app-icon.ico");
+                WriteHiddenLauncher(hiddenLauncher, launcher);
 
                 string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                CreateShortcut(Path.Combine(desktop, AppName + ".lnk"), launcher, installRoot, icon);
+                CreateShortcut(Path.Combine(desktop, AppName + ".lnk"), hiddenLauncher, installRoot, icon);
 
                 string startMenu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), AppName);
                 Directory.CreateDirectory(startMenu);
-                CreateShortcut(Path.Combine(startMenu, AppName + ".lnk"), launcher, installRoot, icon);
+                CreateShortcut(Path.Combine(startMenu, AppName + ".lnk"), hiddenLauncher, installRoot, icon);
 
                 MessageBox.Show(
                     "安装完成。桌面已创建快捷方式。\n\n成就档案会保存在：\n" + archiveRoot,
@@ -81,13 +84,22 @@ namespace EarthOnlineInstaller
             }
         }
 
-        private static void CreateShortcut(string shortcutPath, string launcher, string workingDirectory, string iconPath)
+        private static void WriteHiddenLauncher(string hiddenLauncher, string launcher)
+        {
+            string escapedLauncher = launcher.Replace("\"", "\"\"");
+            string script =
+                "Set shell = CreateObject(\"WScript.Shell\")\r\n" +
+                "shell.Run \"powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"\"" + escapedLauncher + "\"\"\", 0, False\r\n";
+            File.WriteAllText(hiddenLauncher, script, Encoding.ASCII);
+        }
+
+        private static void CreateShortcut(string shortcutPath, string hiddenLauncher, string workingDirectory, string iconPath)
         {
             Type shellType = Type.GetTypeFromProgID("WScript.Shell");
             dynamic shell = Activator.CreateInstance(shellType);
             dynamic shortcut = shell.CreateShortcut(shortcutPath);
-            shortcut.TargetPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "WindowsPowerShell", "v1.0", "powershell.exe");
-            shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"" + launcher + "\"";
+            shortcut.TargetPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "wscript.exe");
+            shortcut.Arguments = "\"" + hiddenLauncher + "\"";
             shortcut.WorkingDirectory = workingDirectory;
             shortcut.IconLocation = iconPath;
             shortcut.Description = AppName;
